@@ -9,12 +9,13 @@ import { isCategory, type ExpenseFilters, type SortField, type SortState } from 
 import { applyFilters, DEFAULT_FILTERS, hasActiveFilters, sortExpenses } from '@/lib/filters';
 import { sumAmounts } from '@/lib/analytics';
 import { formatCurrency } from '@/lib/format';
-import { downloadCSV } from '@/lib/csv';
 import { ExpenseFiltersBar } from '@/components/expenses/ExpenseFiltersBar';
 import { ExpenseList } from '@/components/expenses/ExpenseList';
 import { EmptyState } from '@/components/EmptyState';
 import { ListSkeleton } from '@/components/ui/Skeleton';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { ExportDrawer } from '@/components/export/ExportDrawer';
+import { CATEGORIES } from '@/lib/types';
 
 export default function ExpensesPage() {
   const { expenses, isLoading, clearAll } = useExpenses();
@@ -24,6 +25,7 @@ export default function ExpensesPage() {
   const [filters, setFilters] = useState<ExpenseFilters>(DEFAULT_FILTERS);
   const [sort, setSort] = useState<SortState>({ field: 'date', direction: 'desc' });
   const [confirmClear, setConfirmClear] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   // Allow deep links like /expenses?category=Food (used by the dashboard legend).
   useEffect(() => {
@@ -42,14 +44,14 @@ export default function ExpensesPage() {
         : { field, direction: field === 'date' || field === 'amount' ? 'desc' : 'asc' },
     );
 
-  const handleExport = () => {
-    try {
-      downloadCSV(visible, filtered ? 'expenses-filtered' : 'expenses');
-      showToast({ message: `Exported ${visible.length} ${visible.length === 1 ? 'expense' : 'expenses'} to CSV.` });
-    } catch {
-      showToast({ type: 'error', message: 'Export failed. Please try again.' });
-    }
-  };
+  const exportSeed = useMemo(
+    () => ({
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+      categories: filters.category === 'All' ? [...CATEGORIES] : [filters.category],
+    }),
+    [filters.startDate, filters.endDate, filters.category],
+  );
 
   return (
     <div className="space-y-6">
@@ -60,9 +62,9 @@ export default function ExpensesPage() {
         </div>
         {!isLoading && expenses.length > 0 && (
           <div className="flex gap-2">
-            <button type="button" className="btn-secondary" onClick={handleExport} disabled={visible.length === 0}>
+            <button type="button" className="btn-secondary" onClick={() => setExportOpen(true)} aria-haspopup="dialog">
               <Download className="h-4 w-4" aria-hidden />
-              Export {filtered ? 'filtered' : 'all'}
+              Export…
             </button>
             <button
               type="button"
@@ -111,10 +113,12 @@ export default function ExpensesPage() {
         </>
       )}
 
+      <ExportDrawer open={exportOpen} onClose={() => setExportOpen(false)} expenses={expenses} initialQuery={exportSeed} />
+
       <ConfirmDialog
         open={confirmClear}
         title="Delete all expenses?"
-        message={`This permanently removes all ${expenses.length} expenses from this browser. Consider exporting a CSV backup first. This can't be undone.`}
+        message={`This permanently removes all ${expenses.length} expenses from this browser. Consider exporting a backup first. This can't be undone.`}
         confirmLabel="Delete all"
         onCancel={() => setConfirmClear(false)}
         onConfirm={() => {
