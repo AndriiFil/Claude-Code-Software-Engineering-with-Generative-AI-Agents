@@ -43,7 +43,7 @@ export default function DashboardPage() {
         </div>
         {!isLoading && expenses.length > 0 && (
           <button type="button" className="btn-secondary" onClick={handleExport}>
-            <Download className="h-4 w-4" aria-hidden /> Export CSV
+            <Download className="h-4 w-4" aria-hidden /> Export Data
           </button>
         )}
       </div>
