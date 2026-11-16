@@ -9,7 +9,7 @@ interface ModalProps {
   title: string;
   description?: string;
   children: ReactNode;
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export function Modal({ open, onClose, title, description, children, size = 'md' }: ModalProps) {
@@ -69,7 +69,7 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
         aria-labelledby={titleId}
         tabIndex={-1}
         className={`relative max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-2xl outline-none animate-slide-up sm:rounded-2xl ${
-          size === 'sm' ? 'sm:max-w-md' : 'sm:max-w-xl'
+          size === 'sm' ? 'sm:max-w-md' : size === 'lg' ? 'sm:max-w-3xl' : 'sm:max-w-xl'
         }`}
       >
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">

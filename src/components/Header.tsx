@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, List, Plus, Wallet } from 'lucide-react';
+import { CloudUpload, LayoutDashboard, List, Plus, Wallet } from 'lucide-react';
 import { useExpenseEditor } from '@/context/ExpenseEditorContext';
+import { CloudStatusMenu } from '@/components/cloud/CloudStatusMenu';
 
 const LINKS = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/expenses', label: 'Expenses', icon: List },
+  { href: '/exports', label: 'Exports', icon: CloudUpload },
 ];
 
 export function Header() {
@@ -37,13 +39,18 @@ export function Header() {
                 }`}
               >
                 <Icon className="h-4 w-4" aria-hidden />
-                {label}
+                <span className="hidden sm:inline">{label}</span>
+                <span className="sr-only sm:hidden">{label}</span>
               </Link>
             );
           })}
         </nav>
 
-        <button type="button" onClick={() => openEditor()} className="btn-primary ml-auto">
+        <div className="ml-auto">
+          <CloudStatusMenu />
+        </div>
+
+        <button type="button" onClick={() => openEditor()} className="btn-primary">
           <Plus className="h-4 w-4" aria-hidden />
           <span className="hidden sm:inline">Add expense</span>
           <span className="sr-only sm:hidden">Add expense</span>

@@ -1,12 +1,11 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Download } from 'lucide-react';
+import Link from 'next/link';
+import { CloudUpload } from 'lucide-react';
 import { useExpenses } from '@/context/ExpenseContext';
-import { useToast } from '@/context/ToastContext';
 import { getSummary, monthlyTotals } from '@/lib/analytics';
 import { sortExpenses } from '@/lib/filters';
-import { downloadCSV } from '@/lib/csv';
 import { DashboardSkeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/EmptyState';
 import { SummaryCards } from '@/components/dashboard/SummaryCards';
@@ -16,7 +15,6 @@ import { RecentExpenses } from '@/components/dashboard/RecentExpenses';
 
 export default function DashboardPage() {
   const { expenses, isLoading } = useExpenses();
-  const { showToast } = useToast();
 
   const summary = useMemo(() => getSummary(expenses), [expenses]);
   const monthly = useMemo(() => monthlyTotals(expenses, 6), [expenses]);
@@ -24,15 +22,6 @@ export default function DashboardPage() {
     () => sortExpenses(expenses, { field: 'date', direction: 'desc' }).slice(0, 5),
     [expenses],
   );
-
-  const handleExport = () => {
-    try {
-      downloadCSV(sortExpenses(expenses, { field: 'date', direction: 'desc' }));
-      showToast({ message: `Exported ${expenses.length} expenses to CSV.` });
-    } catch {
-      showToast({ type: 'error', message: 'Export failed. Please try again.' });
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -42,9 +31,9 @@ export default function DashboardPage() {
           <p className="mt-1 text-sm text-slate-500">An overview of your spending habits.</p>
         </div>
         {!isLoading && expenses.length > 0 && (
-          <button type="button" className="btn-secondary" onClick={handleExport}>
-            <Download className="h-4 w-4" aria-hidden /> Export CSV
-          </button>
+          <Link href="/exports" className="btn-secondary">
+            <CloudUpload className="h-4 w-4" aria-hidden /> Export &amp; share
+          </Link>
         )}
       </div>
 
